@@ -1,15 +1,13 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-
+import NewTodoForm from './NewTodoForm';
+import TodoList from './TodoList';
 import { actions } from '../store';
 
-import NewTodoForm from '../components/NewTodoForm';
-import TodoList from '../components/TodoList';
-
 class TodoApp extends Component {
+
   formSubmitted(event) {
     event.preventDefault();
-
     this.props.onAddTodo({
       title: this.props.newTodo,
       done: false
@@ -25,30 +23,32 @@ class TodoApp extends Component {
     });
   }
 
+  removeTodo(index) {
+    this.props.onRemoveTodo({
+      index
+    });
+  }
+
+  allDone() {
+    this.props.onAllDone();
+  }
+
   render() {
     return (
       <div className="App">
         <h3>{this.props.message}</h3>
         <NewTodoForm
-            newTodo={this.props.newTodo}
-            formSubmitted={this.formSubmitted.bind(this)}
-            newTodoChanged={this.props.onNewTodoChanged} />
-        <button onClick={() => this.props.onAllDone()}>All Done</button>
+          newTodo={this.props.newTodo}
+          formSubmitted={this.formSubmitted.bind(this)}
+          newTodoChanged={(event) => this.props.onNewTodoChanged(event.target.value)} />
+        <button onClick={() => this.allDone()}>All Done</button>
         <TodoList
           todos={this.props.todos}
           toggleTodoDone={this.toggleTodoDone.bind(this)}
-          removeTodo={this.props.onRemoveTodo}/>
+          removeTodo={this.removeTodo.bind(this)} />
       </div>
     );
   }
-}
-
-function mapStateToProps(state) {
-  return {
-    message: state.message,
-    newTodo: state.newTodo,
-    todos: state.todos
-  };
 }
 
 function mapDispatchToProps(dispatch) {
@@ -62,13 +62,21 @@ function mapDispatchToProps(dispatch) {
     onToggleTodoDone(toggle) {
       dispatch(actions.toggleTodoDone(toggle));
     },
-    onRemoveTodo(index) {
-      dispatch(actions.removeTodo(index));
+    onRemoveTodo(todo) {
+      dispatch(actions.removeTodo(todo));
     },
-    onAllDone() {
-      dispatch(actions.allDone());
+    onAllDone(todos) {
+      dispatch(actions.allDone(todos));
     }
   }
+}
+
+function mapStateToProps(state) {
+  return {
+    message: state.message,
+    newTodo: state.newTodo,
+    todos: state.todos
+  };
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(TodoApp);
